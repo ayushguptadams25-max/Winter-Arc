@@ -10,39 +10,43 @@ standing under a glowing moon in a falling-snow night sky — before handing
 off to the app itself. It's pure CSS/SVG (no image files), so it loads
 instantly offline and costs nothing in app size. Tap it to skip early.
 
-## Why it installed as a "shortcut" instead of a real app
+## Why "Install" said "This app cannot be installed"
 
-This is almost always caused by **how** the site was opened, not the code:
-- Opening `index.html` directly from a file (`file://…`) or from a plain
-  file host with no HTTPS: browsers refuse to register the service worker
-  or treat the manifest as installable there, and silently fall back to a
-  plain bookmark/shortcut icon.
-- Visiting through a link-preview/in-app browser (e.g. opened from a chat
-  or social app) instead of the real Chrome/Safari app — those in-app
-  browsers usually can't install PWAs at all.
+Your icon files were uploaded straight into the repo root, but the app's
+code was still looking for them inside an `icons/` subfolder — so every
+icon request 404'd. Chrome requires a working icon to consider a site
+installable, so it correctly refused. That 404 also broke the service
+worker's offline cache (its install step fetches every file in one atomic
+batch — if any one of them 404s, the whole cache fails silently), so
+offline mode likely wasn't fully working either.
 
-The fix is the same as before: **serve it over real HTTPS** (GitHub Pages,
-steps below) and open that HTTPS link directly in Chrome (Android) or
-Safari (iPhone) — not a preview browser — before installing. Everything
-else (manifest, service worker, meta tags) was already correctly set up
-for a true installable app; nothing in that part needed to change.
+Fixed: the code now points at the icons in the repo root directly — no
+subfolder, matching exactly what you already uploaded. Re-upload the 7
+files in this folder (overwrite the existing ones), wait ~1 minute for
+GitHub Pages to rebuild, then reload the site in Chrome and try
+**⋮ → Install and create shortcut** again — "Install" should now work.
 
 ## Files in this folder
 
 ```
-winter-arc-app/
-├── index.html      ← the entire app (all content, logic and styling)
-├── manifest.json    ← PWA manifest (app name, icons, colors, display mode)
-├── sw.js            ← service worker (caches everything for true offline use)
-└── icons/
-    ├── icon-192.png
-    ├── icon-512.png
-    └── apple-touch-icon.png
+README.md
+index.html      ← the entire app (all content, logic and styling)
+manifest.json   ← PWA manifest (app name, icons, colors, display mode)
+sw.js           ← service worker (caches everything for true offline use)
+icon-192.png
+icon-512.png
+apple-touch-icon.png
 ```
 
-Upload **all of these files, keeping the same folder structure** (the
-`icons/` folder must stay a subfolder — don't flatten it). Nothing else is
-needed; there is no build step, no dependencies, no npm install.
+All seven files go **directly in the repo root** — no subfolder. (An
+earlier version of this app used an `icons/` subfolder; that's been
+removed so the code always matches a flat upload, since that's how
+GitHub's "Add file → Upload files" tends to end up when files are
+dragged in individually.)
+
+Upload **all seven files**, overwriting the existing ones with the same
+names. Nothing else is needed; there is no build step, no dependencies,
+no npm install.
 
 ## Deploy with GitHub Pages (free, exact steps)
 
@@ -50,10 +54,10 @@ needed; there is no build step, no dependencies, no npm install.
    private both work with GitHub Pages (private repos need GitHub Pro/Team
    for Pages, so public is simplest if you're on a free plan).
 2. **Upload the files**: on the repo page, click "Add file" → "Upload
-   files", drag in `index.html`, `manifest.json`, `sw.js`, and the whole
-   `icons` folder (GitHub preserves the folder structure), then commit.
-   (Or, if you use git locally: `git add .`, `git commit -m "Winter Arc PWA"`,
-   `git push`.)
+   files", drag in all 7 files from this folder at once (`index.html`,
+   `manifest.json`, `sw.js`, `README.md`, and the three `.png` icons —
+   no subfolder), then commit. (Or, if you use git locally: `git add .`,
+   `git commit -m "Winter Arc PWA update"`, `git push`.)
 3. **Turn on Pages**: go to the repo's **Settings** tab → **Pages** (left
    sidebar) → under "Build and deployment", set **Source** to
    "Deploy from a branch" → **Branch**: `main` (or `master`), folder `/ (root)`

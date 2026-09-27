@@ -2,14 +2,14 @@
 // Caches the whole app on install so it works fully offline afterwards,
 // including on a cold launch from the home-screen icon with no network at all.
 
-var CACHE_NAME = 'winter-arc-v3';
+var CACHE_NAME = 'winter-arc-v4';
 var APP_FILES = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', function(event){
